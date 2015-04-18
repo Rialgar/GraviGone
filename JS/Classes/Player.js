@@ -65,6 +65,26 @@ define(["lib/three", "Actor"], function(THREE, Actor){
     }
 
     function Player(game){
+        this.imageSize = {
+            width: 30,
+            height: 48,
+            tileWidth: 13,
+            tileHeight: 22
+        };
+        this.animations = {
+            "idle": [
+                {x:1, y:1, t:250},
+                {x:16, y:1, t:250}
+            ],
+            "jump": [
+                {x:16, y:25, t:250},
+                {next: "air"}
+            ],
+            "air": [
+                {x:1, y:25, t:500}
+            ]
+        };
+
         Actor.call(this, "Player", game);
 
         var self = this;
@@ -94,9 +114,15 @@ define(["lib/three", "Actor"], function(THREE, Actor){
         this.velKeyBoard = new THREE.Vector2();
         this.jumped = 0;
         this.gpJumpPressed = false;
+        this.maxJumps = 1;
     }
 
     Player.prototype = Object.create(Actor.prototype);
+
+    Player.prototype.land = function(){
+        this.jumped = 0;
+        Player.prototype.constructor.prototype.land.call(this);
+    };
 
     Player.prototype.update = function(delta){
         var gp = getGamePad();
@@ -119,17 +145,14 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             this.velocity.x = this.velKeyBoard.x;
         }
 
-        var mayLand = this.velocity.y >= 0;
         Player.prototype.constructor.prototype.update.call(this, delta);
-        if(mayLand && this.velocity.y == 0 && this.position.y%1 == 0.5-this.halfSize.y){
-            this.jumped = 0;
-        }
     };
 
     Player.prototype.jump = function(){
-        if(this.jumped < 1){
+        if(this.jumped < this.maxJumps){
             this.jumped++;
             this.velocity.y = -5;
+            this.setAnimationState("jump",0,0);
         }
     };
 
@@ -138,8 +161,10 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             this.velKeyBoard.x -= 3;
         } else if(code == 0x27 || code == 0x44) { //right or D
             this.velKeyBoard.x += 3;
-        } else if(code == 0x20) { //space
+        } else if(code == 0x26 || code == 0x57) { //up or W
             this.jump();
+        } else if(code == 0x20) { //space
+            this.fire();
         }
     };
 
