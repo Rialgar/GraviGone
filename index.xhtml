@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>Gravigone</title>
+        <link rel="stylesheet" type="text/css" href="./style.css"/>
+        <script type="application/javascript" src="./JS/lib/require.js"></script>
+        <script>
+            requirejs.config({
+                baseUrl: 'JS/Classes',
+                paths: {
+                    lib: '../lib'
+                },
+                shim: {
+                    'lib/three': {
+                        exports: 'THREE'
+                    },
+                    'lib/three.min': {
+                        exports: 'THREE'
+                    }
+                }
+            });
+            requirejs(['Game'],
+                function (Game) {
+                    var game = new Game();
+
+                    window._game_ = game;
+                }
+            );
+        </script>
+    </head>
+    <body>
+
+    </body>
+</html>
