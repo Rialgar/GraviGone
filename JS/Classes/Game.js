@@ -63,6 +63,7 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
         }
         this.player = new Player(position, this);
         this.scene.add(this.player.object);
+        this.scene.add(this.player.arrow.object);
     };
 
     Game.prototype.addAvailableBullet = function(){

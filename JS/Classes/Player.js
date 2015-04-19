@@ -1,7 +1,7 @@
 /**
  * Created by Rialgar on 2015-04-18.
  */
-define(["lib/three", "Actor"], function(THREE, Actor){
+define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
     var haveEvents = 'ongamepadconnected' in window;
     var controllers = {};
     function connecthandler(e) {
@@ -139,7 +139,6 @@ define(["lib/three", "Actor"], function(THREE, Actor){
                     for (var key in self.bindings) {
                         var input =  window.prompt(key, self.bindings[key]);
                         self.bindings[key] = input.split(",");
-
                     }
                 }
             }
@@ -165,6 +164,9 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             fire: ["C", "E", "F", "J", "L"],
             collectZone: ["K", "R", "V", "Num0"]
         };
+
+        this.arrow = new Sprite("Arrow");
+        this.arrow.object.position.z = 25;
 
         this.velKeyBoard = new THREE.Vector2();
         this.jumped = 0;
@@ -267,18 +269,23 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             } else {
                 this.gpCollectPressed = false;
             }
-            /*if(gp.buttons[9] == 1.0 || gp.buttons[9].pressed){
+            if(gp.buttons[9] == 1.0 || gp.buttons[9].pressed){
                 window.location = window.location;
             }
             if(gp.buttons[8] == 1.0 || gp.buttons[8].pressed){
                 this.game.addAvailableBullet();
-            }*/
+            }
         }
         if(this.lastKey > new Date().valueOf()-1000) {
             this.velocity.x = this.velKeyBoard.x;
         }
 
         superclass.prototype.update.call(this, delta);
+
+        var bulletVelocity = this.getBulletVelocity().divideScalar(5);
+        this.arrow.object.position.x = this.position.x + bulletVelocity.x;
+        this.arrow.object.position.y = this.position.y + bulletVelocity.y;
+        this.arrow.object.rotation.z = -Math.atan2(bulletVelocity.y, bulletVelocity.x);
 
         if(this.velocity.x != 0 && this.velocity.y == 0){
             this.driveSoundOn();
@@ -298,17 +305,24 @@ define(["lib/three", "Actor"], function(THREE, Actor){
         }
     };
 
-    Player.prototype.fire = function(){
+    Player.prototype.getBulletVelocity = function(){
         var bulletVelocity = this.velKeyBoard.clone();
         if(bulletVelocity.lengthSq() == 0){
             var gp = getGamePad();
-            bulletVelocity.x = Math.abs(gp.axes[0]) > 0.13 ? gp.axes[0] : 0;
-            bulletVelocity.y = Math.abs(gp.axes[1]) > 0.13 ? gp.axes[1] : 0;
+            if(gp) {
+                bulletVelocity.x = Math.abs(gp.axes[0]) > 0.13 ? gp.axes[0] : 0;
+                bulletVelocity.y = Math.abs(gp.axes[1]) > 0.13 ? gp.axes[1] : 0;
+            }
             if(bulletVelocity.lengthSq() == 0) {
                 bulletVelocity.x = (this.direction == "left") ? -1 : 1;
             }
         }
         bulletVelocity.setLength(5);
+        return bulletVelocity;
+    };
+
+    Player.prototype.fire = function(){
+        var bulletVelocity = this.getBulletVelocity();
         if(this.game.addBullet(this.position.clone(), bulletVelocity)){
             var sound = this.fireSounds.shift();
             sound.play();

@@ -77,7 +77,22 @@ define(["lib/three"], function(THREE){
                 ]
             },
             texture: THREE.ImageUtils.loadTexture( "./images/Ammo.png" )
-        }
+        },
+        "Arrow":{
+        size: {x:7/32, y:7/32},
+        imageSize: {
+            width: 9,
+            height: 9,
+            tileWidth: 7,
+            tileHeight: 7
+        },
+        animations: {
+            idle: [
+                {x:1, y:1, t:500}
+            ]
+        },
+        texture: THREE.ImageUtils.loadTexture( "./images/Arrow.png" )
+    }
 
     };
     function Sprite(name){
