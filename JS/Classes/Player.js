@@ -26,10 +26,7 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             scangamepads();
         }
 
-        var i = 0;
-        var j;
-
-        for (j in controllers) {
+        for (var j in controllers) {
             var controller = controllers[j];
 
             if(controller.mapping == "standard"){
@@ -49,7 +46,7 @@ define(["lib/three", "Actor"], function(THREE, Actor){
                 }
             }
         }
-        for (j in controllers) {
+        for (var j in controllers) {
             var controller = controllers[j];
             if(!controller.connected){
                 removegamepad(controller);
@@ -64,28 +61,10 @@ define(["lib/three", "Actor"], function(THREE, Actor){
         setInterval(scangamepads, 500);
     }
 
-    function Player(game){
-        this.imageSize = {
-            width: 30,
-            height: 48,
-            tileWidth: 13,
-            tileHeight: 22
-        };
-        this.animations = {
-            "idle": [
-                {x:1, y:1, t:250},
-                {x:16, y:1, t:250}
-            ],
-            "jump": [
-                {x:16, y:25, t:250},
-                {next: "air"}
-            ],
-            "air": [
-                {x:1, y:25, t:500}
-            ]
-        };
+    var superclass = Actor;
 
-        Actor.call(this, "Player", game);
+    function Player(game){
+        superclass.call(this, "Player", game);
 
         var self = this;
 
@@ -115,13 +94,15 @@ define(["lib/three", "Actor"], function(THREE, Actor){
         this.jumped = 0;
         this.gpJumpPressed = false;
         this.maxJumps = 1;
+
+        this.gpFirePressed = false;
     }
 
-    Player.prototype = Object.create(Actor.prototype);
+    Player.prototype = Object.create(superclass.prototype);
 
     Player.prototype.land = function(){
         this.jumped = 0;
-        Player.prototype.constructor.prototype.land.call(this);
+        superclass.prototype.land.call(this);
     };
 
     Player.prototype.update = function(delta){
@@ -140,12 +121,20 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             } else {
                 this.gpJumpPressed = false;
             }
+            if(gp.buttons[2] == 1.0 || gp.buttons[2].pressed){
+                if(!this.gpFirePressed){
+                    this.gpFirePressed = true;
+                    this.fire();
+                }
+            } else {
+                this.gpFirePressed = false;
+            }
         }
         if(this.velKeyBoard.x != 0) {
             this.velocity.x = this.velKeyBoard.x;
         }
 
-        Player.prototype.constructor.prototype.update.call(this, delta);
+        superclass.prototype.update.call(this, delta);
     };
 
     Player.prototype.jump = function(){
@@ -156,12 +145,29 @@ define(["lib/three", "Actor"], function(THREE, Actor){
         }
     };
 
+    Player.prototype.fire = function(){
+        var bulletVelocity = this.velKeyBoard.clone();
+        if(bulletVelocity.lengthSq() == 0){
+            var gp = getGamePad();
+            bulletVelocity.x = Math.abs(gp.axes[0]) > 0.13 ? gp.axes[0] : 0;
+            bulletVelocity.y = Math.abs(gp.axes[1]) > 0.13 ? gp.axes[1] : 0;
+            if(bulletVelocity.lengthSq() == 0) {
+                bulletVelocity.x = (this.direction == "left") ? -1 : 1;
+            }
+        }
+        bulletVelocity.setLength(5);
+        this.game.addBullet(this.position.clone(), bulletVelocity);
+    };
+
     Player.prototype.keyDown = function(code){
         if(code == 0x25 || code == 0x41){ //left or A
             this.velKeyBoard.x -= 3;
         } else if(code == 0x27 || code == 0x44) { //right or D
             this.velKeyBoard.x += 3;
+        } else if(code == 0x28 || code == 0x53){ //down or S
+            this.velKeyBoard.y += 3;
         } else if(code == 0x26 || code == 0x57) { //up or W
+            this.velKeyBoard.y -= 3;
             this.jump();
         } else if(code == 0x20) { //space
             this.fire();
@@ -173,6 +179,10 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             this.velKeyBoard.x += 3;
         } else if(code == 0x27 || code == 0x44) { //right or D
             this.velKeyBoard.x -= 3;
+        }  else if(code == 0x28 || code == 0x53){ //down or S
+            this.velKeyBoard.y -= 3;
+        } else if(code == 0x26 || code == 0x57) { //up or W
+            this.velKeyBoard.y += 3;
         }
     };
 

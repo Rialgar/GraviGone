@@ -1,7 +1,7 @@
 /**
  * Created by Rialgar on 2015-04-18.
  */
-define(["lib/three", "Map", "Player"], function(THREE, Map, Player){
+define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone"], function(THREE, Map, Player, Bullet, GraviGoneZone){
     //1024 : 640
     //16 : 10
     function Game(){
@@ -23,11 +23,38 @@ define(["lib/three", "Map", "Player"], function(THREE, Map, Player){
         this.player = new Player(this);
         this.scene.add(this.player.object);
 
+        this.bullets = [];
+        this.zones = [];
+
         var self = this;
         window.requestAnimationFrame(function(){
             self.render();
         });
+        window.addEventListener("resize", function(){
+            self.resize();
+        })
     }
+
+    Game.prototype.addBullet = function(position, velocity){
+        var bullet = new Bullet(position, velocity, this);
+        this.scene.add(bullet.object);
+        this.bullets.push(bullet);
+    };
+
+    Game.prototype.stopUpdatingBullet = function(bullet){
+        this.bullets.splice(this.bullets.indexOf(bullet),1);
+    };
+
+    Game.prototype.addGraviGoneZone = function(position){
+        var zone = new GraviGoneZone(position, this);
+        this.scene.add(zone.object);
+        this.zones.push(zone);
+    };
+
+    Game.prototype.removeGraviGoneZone = function(zone){
+        this.zones.splice(this.zones.indexOf(zone),1);
+        this.scene.remove(zone.object);
+    };
 
     Game.prototype.resize = function(){
         var width = window.innerWidth;
@@ -39,8 +66,6 @@ define(["lib/three", "Map", "Player"], function(THREE, Map, Player){
             height = width * 10/16;
         }
 
-        console.log(width, height);
-
         this.renderer.setSize( width, height );
         this.renderer.domElement.style.top = ((window.innerHeight - height)/2) + "px";
         this.renderer.domElement.style.left = ((window.innerWidth - width)/2) + "px";
@@ -51,6 +76,12 @@ define(["lib/three", "Map", "Player"], function(THREE, Map, Player){
         var now = new Date().valueOf();
         var delta = now-last;
         this.player.update(delta);
+        for (var i = 0; i < this.bullets.length; i++) {
+            this.bullets[i].update(delta);
+        }
+        for (i = 0; i < this.zones.length; i++) {
+            this.zones[i].update(delta);
+        }
         last = now;
     };
 
@@ -64,11 +95,17 @@ define(["lib/three", "Map", "Player"], function(THREE, Map, Player){
     };
 
     Game.prototype.accelerationAt = function(position){
-        return new THREE.Vector2(0, 10);
+        var out = new THREE.Vector2(0, 10);
+        for (var i = 0; i < this.zones.length; i++) {
+            if(this.zones[i].contains(position)){
+                out.multiplyScalar(0.25);
+            }
+        }
+        return out;
     };
 
-    Game.prototype.getCollisions = function(actor){
-        return this.map.getCollisions(actor);
+    Game.prototype.getCollisions = function(collidable){
+        return this.map.getCollisions(collidable);
     };
 
     return Game;

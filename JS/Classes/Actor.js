@@ -1,22 +1,13 @@
 /**
  * Created by Rialgar on 2015-04-18.
  */
-define(["lib/three"], function(THREE){
-    function Actor(name, game){
-        this.game = game;
+define(["lib/three", "Sprite"], function(THREE, Sprite){
+    var superclass = Sprite;
 
-        this.geometry = new THREE.PlaneGeometry(13/32, 22/32);
-        this.geometry.dynamic = true;
-        if(this.animations && this.animations.idle){
-            this.setAnimationState("idle", 0, 0);
-        }
-        var texture = THREE.ImageUtils.loadTexture( "./images/"+name+".png" );
-        texture.minFilter = THREE.LinearFilter;
-        texture.maxFilter = THREE.LinearFilter;
-        var material = new THREE.MeshBasicMaterial({map: texture, transparent: true});
-        material.side = THREE.doubleSided;
-        this.object = new THREE.Mesh(this.geometry, material);
-        this.object.rotation.x = Math.PI;
+    function Actor(name, game){
+        superclass.call(this, name);
+
+        this.game = game;
 
         this.object.position.z = 10;
 
@@ -27,51 +18,12 @@ define(["lib/three"], function(THREE){
         this.direction = "right";
     }
 
-    Actor.prototype.setAnimationState = function(name, frame, time){
-        if(typeof name == "undefined") name = this.currentAnimation;
-        if(typeof frame == "undefined") frame = this.currentFrame;
-        if(typeof time == "undefined") time = this.currentTime;
-
-        while(this.animations[name][frame].t < time){
-            time -= this.animations[name][frame].t;
-            frame = (frame+1) % this.animations[name].length;
-            if(this.animations[name][frame].next){
-                name = this.animations[name][frame].next;
-                frame = 0;
-            }
-        }
-        var f = this.animations[name][frame];
-
-        var x0 = f.x / this.imageSize.width;
-        var x1 = (f.x+this.imageSize.tileWidth) / this.imageSize.width;
-        var y1 = f.y / this.imageSize.height;
-        var y0 = (f.y+this.imageSize.tileHeight) / this.imageSize.height;
-        y0 = 1-y0;
-        y1 = 1-y1;
-
-        if(this.direction == "left") {
-            var t = x1;
-            x1 = x0;
-            x0 = t;
-        }
-        this.geometry.faceVertexUvs[0][0][0].set(x0, y1);
-        this.geometry.faceVertexUvs[0][0][1].set(x0, y0);
-        this.geometry.faceVertexUvs[0][0][2].set(x1, y1);
-        this.geometry.faceVertexUvs[0][1][0].set(x0, y0);
-        this.geometry.faceVertexUvs[0][1][1].set(x1, y0);
-        this.geometry.faceVertexUvs[0][1][2].set(x1, y1);
-
-        this.currentAnimation = name;
-        this.currentFrame = frame;
-        this.currentTime = time;
-
-        this.geometry.uvsNeedUpdate = true;
-    };
+    Actor.prototype = Object.create(superclass.prototype);
 
     Actor.prototype.land = function(){
         if(this.currentAnimation != "idle") {
             this.setAnimationState("idle", 1, 0);
-        };
+        }
     };
 
     Actor.prototype.lookLeft = function(){
@@ -92,11 +44,7 @@ define(["lib/three"], function(THREE){
     var movement = new THREE.Vector2(0,0); //recycled, reflects change of position in one frame
     var acc = new THREE.Vector2(0,0); //recycled, reflects change of velocity in one frame
     Actor.prototype.update = function(delta){
-        if(this.currentAnimation) {
-            this.currentTime += delta;
-            this.setAnimationState();
-        }
-
+        superclass.prototype.update.call(this, delta);
         var d = delta/1000;
 
         movement.copy(this.velocity);
@@ -144,7 +92,7 @@ define(["lib/three"], function(THREE){
             }
         }
 
-        if((this.velocity.y != 0 || correction.y < 0) && this.currentAnimation != "air" && this.currentAnimation != "jump"){
+        if((correction.y <= 0) && this.currentAnimation != "air" && this.currentAnimation != "jump"){
             this.setAnimationState("air",0,0);
         }
 

@@ -12,7 +12,7 @@ define(["lib/three"], function(THREE) {
         var max = collidable.position.clone().add(collidable.halfSize);
 
         var out = [];
-        for(var x = Math.max(0, Math.round(min.x)); x < Math.min(this.width-1, max.x+0.5); x++){
+        for(var x = Math.max(0, Math.round(min.x)); x < Math.min(this.width, max.x+0.5); x++){
             for(var y =Math.max(0, Math.round(min.y)); y < Math.min(this.height, max.y+0.5); y++){
                 if(this.walls[y][x]){
                     var collision = new THREE.Vector2(2, 2);
