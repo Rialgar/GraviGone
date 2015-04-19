@@ -14,26 +14,40 @@ define(["lib/three", "Sprite"], function(THREE, Sprite){
 
         this.object.scale.set(0, 0, 1);
         this.time = 0;
+
+        this.times = {
+            grow: 300,
+            stay: 4700,
+            shrink: 5000
+        }
     }
     GraviGoneZone.prototype = Object.create(superclass.prototype);
 
     GraviGoneZone.prototype.update = function(delta){
         superclass.prototype.update.call(this, delta);
         this.time += delta;
-        if(this.time <= 300){
-            this.object.scale.set(this.time/300, this.time/300, 1);
-        } else if(this.time <= 4700) {
-            this.object.scale.set(1, 1, 1);
-        } else if(this.time <= 5000) {
-            this.object.scale.set((5000-this.time)/300, (5000-this.time)/300, 1);
+        var t = 0;
+        if(this.time <= this.times.grow){
+            t = this.time/this.times.grow;
+        } else if(this.time <= this.times.stay) {
+            t = 1;
+        } else if(this.time <= this.times.shrink) {
+            t = (this.times.shrink-this.time)/(this.times.shrink - this.times.stay);
         } else {
             this.game.removeGraviGoneZone(this);
         }
+        this.object.scale.set(t, t, 1);
     };
 
     GraviGoneZone.prototype.contains = function(position){
         var dSq = this.position.distanceToSquared(position);
         return dSq < 4;
+    };
+
+    GraviGoneZone.prototype.collect = function(){
+        var d = this.times.shrink-this.times.stay;
+        this.times.stay = Math.max(this.times.grow, Math.min(this.times.stay, this.time));
+        this.times.shrink = this.times.stay + d;
     };
 
     return GraviGoneZone;

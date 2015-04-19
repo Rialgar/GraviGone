@@ -32,13 +32,18 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone"], function(THREE
         });
         window.addEventListener("resize", function(){
             self.resize();
-        })
+        });
+
+        this.availableBullets = 1;
     }
 
     Game.prototype.addBullet = function(position, velocity){
-        var bullet = new Bullet(position, velocity, this);
-        this.scene.add(bullet.object);
-        this.bullets.push(bullet);
+        if(this.availableBullets > 0) {
+            this.availableBullets--;
+            var bullet = new Bullet(position, velocity, this);
+            this.scene.add(bullet.object);
+            this.bullets.push(bullet);
+        }
     };
 
     Game.prototype.stopUpdatingBullet = function(bullet){
@@ -51,9 +56,17 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone"], function(THREE
         this.zones.push(zone);
     };
 
+    Game.prototype.collectGraviGoneZone = function(){
+        var zone = this.zones[0];
+        if(zone){
+            zone.collect();
+        }
+    };
+
     Game.prototype.removeGraviGoneZone = function(zone){
         this.zones.splice(this.zones.indexOf(zone),1);
         this.scene.remove(zone.object);
+        this.availableBullets++;
     };
 
     Game.prototype.resize = function(){

@@ -71,7 +71,7 @@ define(["lib/three", "Actor"], function(THREE, Actor){
         var down = [];
         window.addEventListener("keydown", function(evt){
             var code = evt.keyCode;
-            if(code >= 0x20 && code <= 0x5A){
+            if(code >= 0x20 && code <= 0x60){
                 evt.preventDefault();
                 if(!down[code]){
                     down[code] = true;
@@ -81,7 +81,7 @@ define(["lib/three", "Actor"], function(THREE, Actor){
         });
         window.addEventListener("keyup", function(evt){
             var code = evt.keyCode;
-            if(code >= 0x20 && code <= 0x5A){
+            if(code >= 0x20 && code <= 0x60){
                 evt.preventDefault();
                 if(down[code]){
                     down[code] = false;
@@ -129,6 +129,14 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             } else {
                 this.gpFirePressed = false;
             }
+            if(gp.buttons[1] == 1.0 || gp.buttons[1].pressed){
+                if(!this.gpCollectPressed){
+                    this.gpCollectPressed = true;
+                    this.collect();
+                }
+            } else {
+                this.gpCollectPressed = false;
+            }
         }
         if(this.velKeyBoard.x != 0) {
             this.velocity.x = this.velKeyBoard.x;
@@ -159,6 +167,10 @@ define(["lib/three", "Actor"], function(THREE, Actor){
         this.game.addBullet(this.position.clone(), bulletVelocity);
     };
 
+    Player.prototype.collect = function(){
+        this.game.collectGraviGoneZone();
+    };
+
     Player.prototype.keyDown = function(code){
         if(code == 0x25 || code == 0x41){ //left or A
             this.velKeyBoard.x -= 3;
@@ -171,6 +183,8 @@ define(["lib/three", "Actor"], function(THREE, Actor){
             this.jump();
         } else if(code == 0x20) { //space
             this.fire();
+        } else if(code == 0x52 || code == 0x2D || code == 0x60){ //R or Insert(Num0) or Num0
+            this.collect();
         }
     };
 
