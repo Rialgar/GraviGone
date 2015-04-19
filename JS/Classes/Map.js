@@ -2,14 +2,20 @@
  * Created by Rialgar on 2015-04-18.
  */
 define(["lib/three"], function(THREE) {
-    function Map() {
+    function Map(game) {
         this.width = 0;
         this.height = 0;
+        this.tileSize = 24/32;
+
+        this.game = game;
     }
 
     Map.prototype.getCollisions = function(collidable){
         var min = collidable.position.clone().sub(collidable.halfSize);
         var max = collidable.position.clone().add(collidable.halfSize);
+
+        min.addScalar(0.5).divideScalar(this.tileSize).subScalar(0.5);
+        max.addScalar(0.5).divideScalar(this.tileSize).subScalar(0.5);
 
         var out = [];
         for(var x = Math.max(0, Math.round(min.x)); x < Math.min(this.width, max.x+0.5); x++){
@@ -52,6 +58,7 @@ define(["lib/three"], function(THREE) {
                             collision.y = posY;
                         }
                     }
+                    collision.multiplyScalar(this.tileSize);
                     out.push(collision);
                 }
             }
@@ -60,7 +67,7 @@ define(["lib/three"], function(THREE) {
         return out;
     };
 
-    var collisionIds = [1];
+    var freeIds = [0,4];
     Map.prototype.loadData = function(data){
         this.walls = [];
         this.width = data.width;
@@ -71,7 +78,7 @@ define(["lib/three"], function(THREE) {
             parent.remove(this.object);
         }
 
-        var geometry = new THREE.PlaneGeometry(data.width, data.height, data.width, data.height);
+        var geometry = new THREE.PlaneGeometry(data.width*this.tileSize, data.height*this.tileSize, data.width, data.height);
         geometry.faceVertexUvs[0] = [];
 
         var offset = 0;
@@ -106,7 +113,7 @@ define(["lib/three"], function(THREE) {
 
                 offset += 2;
 
-                this.walls[y][x] = collisionIds.indexOf(tile.gid-1) >= 0;
+                this.walls[y][x] = freeIds.indexOf(tile.gid-1) < 0;
             }
         }
 
@@ -118,8 +125,27 @@ define(["lib/three"], function(THREE) {
         var material = new THREE.MeshBasicMaterial({map: texture});
         this.object = new THREE.Mesh(geometry, material);
         this.object.rotation.x = Math.PI;
-        this.object.position.x = 7.5;
-        this.object.position.y = 4.5;
+        this.object.position.x = (this.width/2)*this.tileSize - 0.5;
+        this.object.position.y = (this.height/2)*this.tileSize - 0.5;
+
+        this.dimensions = new THREE.Vector2(this.width*this.tileSize, this.height*this.tileSize);
+
+        var w = data.tileSets[0].tileWidth;
+        for (var i = 0; i < data.objectGroups.length; i++) {
+            var objectGroup = data.objectGroups[i];
+            for (var j = 0; j < objectGroup.objects.length; j++) {
+                var object = objectGroup.objects[j];
+                var position = new THREE.Vector2(object.x, object.y);
+                position.x += object.tileSet.tileWidth/2;
+                position.y -= object.tileSet.tileHeight/2;
+                console.log(position);
+                position.subScalar(w/2).divideScalar(w);
+                console.log(position);
+                position.addScalar(0.5).multiplyScalar(this.tileSize).subScalar(0.5);
+                console.log(position);
+                this.game.addObject(object.tileSet.name, position);
+            }
+        }
 
         if(parent){
             parent.add(this.object);
@@ -143,7 +169,8 @@ define(["lib/three"], function(THREE) {
             tileWidth: parseInt(dom.documentElement.getAttribute("tilewidth")),
             tileHeight: parseInt(dom.documentElement.getAttribute("tileheight")),
             tileSets: [],
-            layers: []
+            layers: [],
+            objectGroups: []
         };
         var tileSetElements = dom.getElementsByTagName("tileset");
         for (var i = 0; i < tileSetElements.length; i++) {
@@ -210,6 +237,33 @@ define(["lib/three"], function(THREE) {
                 layer.tiles[y][x] = tile;
             }
             out.layers.push(layer);
+        }
+
+        var objectGroupElements = dom.getElementsByTagName("objectgroup");
+        for (i = 0; i < objectGroupElements.length; i++) {
+            var ogElement = objectGroupElements[i];
+            var objectGroup = {
+                name: ogElement.getAttribute("name"),
+                objects: []
+            };
+            var objectElements = ogElement.getElementsByTagName("object");
+            for (j = 0; j < objectElements.length; j++) {
+                var oElement = objectElements[j];
+                var object = {
+                    id: parseInt(oElement.getAttribute("id")),
+                    gid: parseInt(oElement.getAttribute("gid")),
+                    x: parseInt(oElement.getAttribute("x")),
+                    y: parseInt(oElement.getAttribute("y"))
+                };
+
+                object.tileSet = getTileSetForGid(object.gid);
+                object.imageCoordinates = {};
+                object.imageCoordinates.x = (object.gid - object.tileSet.firstGid) % object.tileSet.width;
+                object.imageCoordinates.y = (object.gid - object.tileSet.firstGid - object.imageCoordinates.x) / object.tileSet.width;
+
+                objectGroup.objects.push(object);
+            }
+            out.objectGroups.push(objectGroup);
         }
 
         return out;

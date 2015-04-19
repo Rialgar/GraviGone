@@ -27,6 +27,9 @@ define(["lib/three", "Sprite"], function(THREE, Sprite){
     var movement = new THREE.Vector2();
     Bullet.prototype.update = function(delta){
         superclass.prototype.update.call(this, delta);
+        if(this.currentAnimation != "idle"){
+            return;
+        }
 
         movement.copy(this.velocity);
         movement.multiplyScalar(delta/1000);
@@ -57,10 +60,6 @@ define(["lib/three", "Sprite"], function(THREE, Sprite){
 
         this.object.position.x = this.position.x;
         this.object.position.y = this.position.y;
-
-        if(this.currentAnimation == "scorch"){
-            this.game.stopUpdatingBullet(this);
-        }
     };
 
     return Bullet;

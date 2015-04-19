@@ -3,6 +3,33 @@
  */
 define(["lib/three", "Sprite"], function(THREE, Sprite){
     var superclass = Sprite;
+
+    var sounds = {
+        on: [
+            new Audio("./sounds/zoneOn.wav"),
+            new Audio("./sounds/zoneOn.wav"),
+            new Audio("./sounds/zoneOn.wav"),
+            new Audio("./sounds/zoneOn.wav"),
+            new Audio("./sounds/zoneOn.wav"),
+            new Audio("./sounds/zoneOn.wav")
+        ],
+        off: [
+            new Audio("./sounds/zoneOff.wav"),
+            new Audio("./sounds/zoneOff.wav"),
+            new Audio("./sounds/zoneOff.wav"),
+            new Audio("./sounds/zoneOff.wav"),
+            new Audio("./sounds/zoneOff.wav"),
+            new Audio("./sounds/zoneOff.wav")
+        ]
+    };
+
+    for (i = 0; i < sounds.on.length; i++) {
+        sounds.on[i].volume = 0.4;
+    }
+    for (i = 0; i < sounds.off.length; i++) {
+        sounds.off[i].volume = 0.4;
+    }
+
     function GraviGoneZone(position, game) {
         superclass.call(this, "GravityGoneZone");
 
@@ -19,7 +46,12 @@ define(["lib/three", "Sprite"], function(THREE, Sprite){
             grow: 300,
             stay: 4700,
             shrink: 5000
-        }
+        };
+
+        this.startedShrink = false;
+        var sound = sounds.on.shift();
+        sound.play();
+        sounds.on.push(sound);
     }
     GraviGoneZone.prototype = Object.create(superclass.prototype);
 
@@ -32,9 +64,15 @@ define(["lib/three", "Sprite"], function(THREE, Sprite){
         } else if(this.time <= this.times.stay) {
             t = 1;
         } else if(this.time <= this.times.shrink) {
+            if(!this.startedShrink){
+                this.startedShrink = true;
+                var sound = sounds.off.shift();
+                sound.play();
+                sounds.off.push(sound);
+            }
             t = (this.times.shrink-this.time)/(this.times.shrink - this.times.stay);
         } else {
-            this.game.removeGraviGoneZone(this);
+            this.needsRemoval = true;
         }
         this.object.scale.set(t, t, 1);
     };
@@ -45,6 +83,7 @@ define(["lib/three", "Sprite"], function(THREE, Sprite){
     };
 
     GraviGoneZone.prototype.collect = function(){
+        this.collected = true;
         var d = this.times.shrink-this.times.stay;
         this.times.stay = Math.max(this.times.grow, Math.min(this.times.stay, this.time));
         this.times.shrink = this.times.stay + d;

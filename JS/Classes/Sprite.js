@@ -62,6 +62,21 @@ define(["lib/three"], function(THREE){
                 ]
             },
             texture: THREE.ImageUtils.loadTexture( "./images/GraviGoneZone.png" )
+        },
+        "Ammo":{
+            size: {x:7/32, y:13/32},
+            imageSize: {
+                width: 9,
+                height: 15,
+                tileWidth: 7,
+                tileHeight: 13
+            },
+            animations: {
+                idle: [
+                    {x:1, y:1, t:500}
+                ]
+            },
+            texture: THREE.ImageUtils.loadTexture( "./images/Ammo.png" )
         }
 
     };

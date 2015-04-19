@@ -4,14 +4,14 @@
 define(["lib/three", "Sprite"], function(THREE, Sprite){
     var superclass = Sprite;
 
-    function Actor(name, game){
+    function Actor(name, position, game){
         superclass.call(this, name);
 
         this.game = game;
 
         this.object.position.z = 10;
 
-        this.position = new THREE.Vector2(1,1);
+        this.position = position;
         this.velocity = new THREE.Vector2(0,0);
 
         this.halfSize = new THREE.Vector2(13/32 /2, 22/32 /2);
