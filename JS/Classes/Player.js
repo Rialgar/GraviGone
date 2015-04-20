@@ -277,7 +277,7 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
                 this.game.addAvailableBullet();
             }*/
         }
-        if(this.lastKey > new Date().valueOf()-1000) {
+        if(this.velKeyBoard.x != 0 || this.lastKey > new Date().valueOf()-1000) {
             this.velocity.x = this.velKeyBoard.x;
         }
 
@@ -341,7 +341,6 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
 
     Player.prototype.keyDown = function(code){
         var keyName = keys[code];
-        console.log(keyName);
         if(this.bindings.toggleSounds.indexOf(keyName) >= 0){
             this.game.toggleSounds();
         } else if(this.bindings.left.indexOf(keyName) >= 0){
