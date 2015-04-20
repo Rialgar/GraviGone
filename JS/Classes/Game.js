@@ -74,7 +74,7 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
         this.muted = false;
 
         this.messages = [
-            /*{ msg:"Welcome!", trigger: "time", t:1000, length:2000},
+            { msg:"Welcome!", trigger: "time", t:1000, length:2000},
             { msg:"You can Play via Keyboard, but I optimized for Gamepads.", trigger: "time", t:500, length:5000},
             { msg:"Use left Stick, WASD or Arrow Keys to move.", trigger: "time", t:500, length:5000},
             { msg:"Toggle Sound with M.", trigger: "time", t:500, length:3000},
@@ -88,8 +88,11 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
             { msg:"You can shoot again once the GraviGone field decayed after 5 seconds.", trigger: "time", t: 500, length:5000},
             { msg:"You can collect the GraviGone field early with K, R, V, Num0 or Red (B) on your Gamepad.", trigger: "time", t: 500, length:10000},
             { msg:"Congratulations, you found your second GraviGone Cartridge.", trigger: "collection", count: 2, length:5000},
-            { msg:"You can now place two GraviGone fields to jump higher and farther.", trigger: "time", t:500, length:5000},*/
-            { msg:"<br/><br/><br/>Well done!<br/>You reached the end of the Game!<br/>I hope you liked it.<br/><br/><br/>", trigger: "location", location: new THREE.Vector2(36, 35.9), length:60000}
+            { msg:"You can now place two GraviGone fields to jump higher and farther.", trigger: "time", t:500, length:5000},
+            { msg:"Where two or more GraviGone fields overlap, the gravity is even more reduced.", trigger: "time", t:500, length:5000},
+            { msg:"Hooray!, You found the remaining GraviGone Cartridges.", trigger: "collection", count: 8, length:5000},
+            { msg:"With that many fields, you could climb any wall!", trigger: "time", t:500, length:10000},
+            { msg:"<br/><br/><br/>Well done!<br/>You reached the end of the game!<br/>I hope you liked it.<br/><br/><br/>", trigger: "location", location: new THREE.Vector2(36, 35.9), length:60000}
         ];
         this.nextMessage = 0;
         this.showNextMessage();
@@ -119,6 +122,10 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
                 }
             }
         }
+    };
+
+    Game.prototype.toggleSounds = function(){
+        this.muted = !this.muted;
     };
 
     Game.prototype.createPlayer = function(position){

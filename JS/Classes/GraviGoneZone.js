@@ -49,9 +49,11 @@ define(["lib/three", "Sprite"], function(THREE, Sprite){
         };
 
         this.startedShrink = false;
-        var sound = sounds.on.shift();
-        sound.play();
-        sounds.on.push(sound);
+        if(!this.game.muted) {
+            var sound = sounds.on.shift();
+            sound.play();
+            sounds.on.push(sound);
+        }
     }
     GraviGoneZone.prototype = Object.create(superclass.prototype);
 
@@ -66,9 +68,11 @@ define(["lib/three", "Sprite"], function(THREE, Sprite){
         } else if(this.time <= this.times.shrink) {
             if(!this.startedShrink){
                 this.startedShrink = true;
-                var sound = sounds.off.shift();
-                sound.play();
-                sounds.off.push(sound);
+                if(!this.game.muted) {
+                    var sound = sounds.off.shift();
+                    sound.play();
+                    sounds.off.push(sound);
+                }
             }
             t = (this.times.shrink-this.time)/(this.times.shrink - this.times.stay);
         } else {

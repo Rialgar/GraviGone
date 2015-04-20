@@ -128,7 +128,6 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
         window.addEventListener("keydown", function(evt){
             var code = evt.keyCode;
             if(code >= 0x20 && code <= 0x60){
-                self.lastKey = new Date().valueOf();
                 evt.preventDefault();
                 if(!down[code]){
                     down[code] = true;
@@ -146,7 +145,6 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
         window.addEventListener("keyup", function(evt){
             var code = evt.keyCode;
             if(code >= 0x20 && code <= 0x60){
-                self.lastKey = new Date().valueOf();
                 evt.preventDefault();
                 if(down[code]){
                     down[code] = false;
@@ -156,6 +154,7 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
         });
 
         this.bindings = {
+            toggleSounds: ["M"],
             down: ["S", "ArrowDown"],
             up: ["W", "ArrowUp"],
             left: ["A", "ArrowLeft"],
@@ -300,9 +299,11 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
             this.jumped++;
             this.velocity.y = -5;
             this.setAnimationState("jump",0,0);
-            var sound = this.jumpSounds.shift();
-            sound.play();
-            this.jumpSounds.push(sound);
+            if(!this.game.muted) {
+                var sound = this.jumpSounds.shift();
+                sound.play();
+                this.jumpSounds.push(sound);
+            }
         }
     };
 
@@ -325,9 +326,11 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
     Player.prototype.fire = function(){
         var bulletVelocity = this.getBulletVelocity();
         if(this.game.addBullet(this.position.clone(), bulletVelocity)){
-            var sound = this.fireSounds.shift();
-            sound.play();
-            this.fireSounds.push(sound);
+            if(!this.game.muted) {
+                var sound = this.fireSounds.shift();
+                sound.play();
+                this.fireSounds.push(sound);
+            }
         }
     };
 
@@ -338,14 +341,20 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
     Player.prototype.keyDown = function(code){
         var keyName = keys[code];
         console.log(keyName);
-        if(this.bindings.left.indexOf(keyName) >= 0){
+        if(this.bindings.toggleSounds.indexOf(keyName) >= 0){
+            this.game.toggleSounds();
+        } else if(this.bindings.left.indexOf(keyName) >= 0){
             this.velKeyBoard.x -= 3;
+            this.lastKey = new Date().valueOf();
         } else if(this.bindings.right.indexOf(keyName) >= 0) {
             this.velKeyBoard.x += 3;
+            this.lastKey = new Date().valueOf();
         } else if(this.bindings.down.indexOf(keyName) >= 0) {
             this.velKeyBoard.y += 3;
+            this.lastKey = new Date().valueOf();
         } else if(this.bindings.up.indexOf(keyName) >= 0) {
             this.velKeyBoard.y -= 3;
+            this.lastKey = new Date().valueOf();
         } else if(this.bindings.jump.indexOf(keyName) >= 0) {
             this.jump();
         } else if(this.bindings.fire.indexOf(keyName) >= 0) {
@@ -359,12 +368,16 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
         var keyName = keys[code];
         if(this.bindings.left.indexOf(keyName) >= 0){
             this.velKeyBoard.x += 3;
+            this.lastKey = new Date().valueOf();
         } else if(this.bindings.right.indexOf(keyName) >= 0) {
             this.velKeyBoard.x -= 3;
+            this.lastKey = new Date().valueOf();
         } else if(this.bindings.down.indexOf(keyName) >= 0) {
             this.velKeyBoard.y -= 3;
+            this.lastKey = new Date().valueOf();
         } else if(this.bindings.up.indexOf(keyName) >= 0) {
             this.velKeyBoard.y += 3;
+            this.lastKey = new Date().valueOf();
         }
     };
 
