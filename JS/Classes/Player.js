@@ -268,13 +268,14 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
                 }
             } else {
                 this.gpCollectPressed = false;
-            }
-            if(gp.buttons[9] == 1.0 || gp.buttons[9].pressed){
+            };
+            //debug features
+            /*if(gp.buttons[9] == 1.0 || gp.buttons[9].pressed){
                 window.location = window.location;
             }
             if(gp.buttons[8] == 1.0 || gp.buttons[8].pressed){
                 this.game.addAvailableBullet();
-            }
+            }*/
         }
         if(this.lastKey > new Date().valueOf()-1000) {
             this.velocity.x = this.velKeyBoard.x;
