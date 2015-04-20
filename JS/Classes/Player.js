@@ -160,7 +160,7 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
             left: ["A", "ArrowLeft"],
             right: ["D", "ArrowRight"],
             jump: ["Space", "X", "E", "H"],
-            fire: ["C", "E", "F", "J", "L"],
+            fire: ["C", "F", "J", "L"],
             collectZone: ["K", "R", "V", "Num0"]
         };
 
@@ -176,6 +176,7 @@ define(["lib/three", "Actor", "Sprite"], function(THREE, Actor, Sprite){
 
         this.driveSound1 = new Audio("./sounds/drive.wav");
         this.driveSound2 = new Audio("./sounds/drive.wav");
+        this.driveSoundOff();
         var oneToTwo = function(){
             self.driveSound1.pause();
             self.driveSound1.currentTime = 0;

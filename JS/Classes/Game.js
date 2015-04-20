@@ -34,9 +34,6 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
         this.cameraMax = this.map.dimensions.clone().sub(this.cameraMin).subScalar(1);
 
         var self = this;
-        window.requestAnimationFrame(function(){
-            self.render();
-        });
         window.addEventListener("resize", function(){
             self.resize();
         });
@@ -57,7 +54,7 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
 
         this.messageUI = document.createElement("div");
         this.messageUI.style.width = "100%";
-        this.messageUI.style.opacity = "0";
+        this.messageUI.style.opacity = "1";
         this.messageUI.style.transition = "opacity 0.2s";
         this.messageUI.style.webkitTransition = "opacity 0.2s";
 
@@ -66,6 +63,8 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
         this.messageUI.style.fontSize = "24pt";
         this.messageUI.style.color = "white";
         this.messageUI.style.backgroundColor = "rgba(0,0,0,0.5)";
+
+        this.messageUI.innerHTML = "<br/><br/><br/>Press any Key to start<br/><br/><br/><br/>";
 
         this.ui.appendChild(this.messageUI);
 
@@ -82,7 +81,7 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
             { msg:"Jump with Space, X, E, H or Green (A) on your Gamepad.", trigger: "location", location: new THREE.Vector2(3.5, 5.9), length:9000},
             { msg:"You collected your first GraviGone Cartridge.", trigger: "collection", count: 1, length:5000},
             { msg:"It allows you to fire a GraviGone Seed.", trigger: "time", t: 500, length:5000},
-            { msg:"Fire with C, E, F, J, L or Blue (X) on your Gamepad.", trigger: "time", t: 500, length:9000},
+            { msg:"Fire with C, F, J, L or Blue (X) on your Gamepad.", trigger: "time", t: 500, length:9000},
             { msg:"The Seed creates a GraviGone field on Impact.", trigger: "time", t: 500, length:5000},
             { msg:"Gravity is reduced inside GraviGone fields.", trigger: "time", t: 500, length:5000},
             { msg:"You can shoot again once the GraviGone field decayed after 5 seconds.", trigger: "time", t: 500, length:5000},
@@ -95,8 +94,22 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
             { msg:"<br/><br/><br/>Well done!<br/>You reached the end of the game!<br/>I hope you liked it.<br/><br/><br/>", trigger: "location", location: new THREE.Vector2(36, 35.9), length:60000}
         ];
         this.nextMessage = 0;
-        this.showNextMessage();
+
+        var starter = function(){
+            self.start();
+            window.removeEventListener("keydown", starter)
+        };
+        window.addEventListener("keydown", starter);
     }
+
+    Game.prototype.start = function(){
+        this.messageUI.style.opacity = "0";
+        var self = this;
+        window.requestAnimationFrame(function(){
+            self.render();
+        });
+        this.showNextMessage();
+    };
 
     Game.prototype.showNextMessage = function(time){
         time = Math.max(time || 0, 500);
