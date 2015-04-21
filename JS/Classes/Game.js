@@ -250,7 +250,7 @@ define(["lib/three", "Map", "Player", "Bullet", "GraviGoneZone", "Collectible"],
         if(width > height * 16/10){
             width *= 10/height;
             height = 10;
-        } else if(height > width * 10/16){
+        } else {
             height *= 16/width;
             width = 16;
         }

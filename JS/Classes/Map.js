@@ -138,11 +138,8 @@ define(["lib/three"], function(THREE) {
                 var position = new THREE.Vector2(object.x, object.y);
                 position.x += object.tileSet.tileWidth/2;
                 position.y -= object.tileSet.tileHeight/2;
-                console.log(position);
                 position.subScalar(w/2).divideScalar(w);
-                console.log(position);
                 position.addScalar(0.5).multiplyScalar(this.tileSize).subScalar(0.5);
-                console.log(position);
                 this.game.addObject(object.tileSet.name, position);
             }
         }
